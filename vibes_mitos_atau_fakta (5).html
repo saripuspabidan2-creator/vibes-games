@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vibes Game — Mitos atau Fakta?</title>
+<style>
+:root{--navy:#17345f;--blue:#3678d4;--pink:#f05a83;--mint:#dff8ee;--cream:#fffaf0;--purple:#7655c9;--green:#21845c}
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(135deg,#e9f4ff,#fff2f5 55%,#fff9df);font-family:Arial,Helvetica,sans-serif;color:var(--navy);padding:18px}
+.game{max-width:850px;margin:0 auto;background:#fff;border:3px solid #e4eaff;border-radius:28px;overflow:hidden;box-shadow:0 14px 35px #17345f18}
+header{padding:28px 24px;text-align:center;background:linear-gradient(110deg,#dff1ff,#fce6f0);border-bottom:2px solid #e8eefa}
+.badge{display:inline-block;background:#fff;border-radius:999px;padding:7px 14px;font-size:12px;font-weight:800;letter-spacing:1px;color:var(--purple)}
+h1{font-size:clamp(27px,5vw,42px);margin:13px 0 8px;line-height:1.08}
+header p{margin:0;line-height:1.5}
+main{padding:22px}
+.topline{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:12px;font-weight:700}
+.track{height:10px;background:#edf1f8;border-radius:99px;overflow:hidden;margin-bottom:22px}
+.fill{height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--purple));transition:width .3s}
+.card{background:var(--cream);border:2px solid #f0e8d8;border-radius:22px;padding:24px;text-align:center}
+.topic{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--purple);font-weight:800}
+.question{font-size:clamp(20px,3.8vw,28px);font-weight:800;line-height:1.35;margin:15px 0 22px}
+.answers{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+button{font:inherit;cursor:pointer;border:0;border-radius:15px;padding:14px 16px;font-weight:800;transition:transform .12s,filter .12s}
+button:hover{filter:brightness(.98);transform:translateY(-1px)}
+.answer{background:#fff;border:2px solid #dce6f7;color:var(--navy);font-size:17px}
+.answer:first-child{border-color:#b9d8ff}
+.answer:last-child{border-color:#f5bfd0}
+.answer:disabled{cursor:default;transform:none}
+.feedback{margin-top:17px;text-align:left;padding:15px;border-radius:14px;line-height:1.5;display:none}
+.feedback.good{display:block;background:#e3f8ed;border:1px solid #a8e2c2}
+.feedback.bad{display:block;background:#fff0e6;border:1px solid #ffd0ae}
+.actions{display:flex;justify-content:center;gap:10px;margin-top:18px;flex-wrap:wrap}
+.primary{background:var(--blue);color:#fff;min-width:145px}
+.secondary{background:#eef2fb;color:var(--navy)}
+.small{font-size:12px;color:#65748e;text-align:center;line-height:1.5;margin:18px 4px 0}
+.result{display:none;text-align:center;padding:15px 5px 8px}
+.result .score{font-size:54px;font-weight:900;color:var(--purple);margin:12px}
+.result h2{font-size:28px;margin:8px 0}
+.result p{line-height:1.6}
+.review{margin:18px auto;text-align:left;max-width:600px;background:#f5f7fc;border-radius:16px;padding:15px;line-height:1.55}
+@media(max-width:520px){body{padding:8px}.game{border-radius:20px}main{padding:14px}.card{padding:18px}.answers{grid-template-columns:1fr}.answer{padding:13px}}
+</style>
+</head>
+<body>
+<div class="game">
+<header>
+  <span class="badge">VIBES • BELAJAR SAMBIL BERMAIN</span>
+  <h1>🧠 Mitos atau Fakta?</h1>
+  <p>Uji pengetahuanmu tentang kesehatan seksual dan reproduksi.<br>Jawab, pelajari alasannya, lalu jadilah pembaca yang kritis!</p>
+</header>
+<main>
+  <div id="play">
+    <div class="topline"><span id="counter">Pertanyaan 1 dari 8</span><span id="scoreLabel">⭐ Skor: 0</span></div>
+    <div class="track"><div class="fill" id="fill"></div></div>
+    <section class="card">
+      <div class="topic" id="topic">Modul 1 • Mengenal tubuh</div>
+      <div class="question" id="question"></div>
+      <div class="answers">
+        <button class="answer" id="trueBtn" onclick="answer(true)">✅ FAKTA</button>
+        <button class="answer" id="falseBtn" onclick="answer(false)">❌ MITOS</button>
+      </div>
+      <div class="feedback" id="feedback" aria-live="polite"></div>
+      <div class="actions"><button class="primary" id="nextBtn" onclick="nextQuestion()" style="display:none">Lanjut ➜</button></div>
+    </section>
+    <p class="small">Game edukasi, bukan alat diagnosis atau pengganti konsultasi tenaga kesehatan.</p>
+  </div>
+  <section class="result" id="result">
+    <div style="font-size:52px">🎉</div>
+    <h2>Game selesai!</h2>
+    <div class="score" id="finalScore">0/8</div>
+    <p id="resultText"></p>
+    <div class="review" id="review"></div>
+    <button class="primary" onclick="restart()">🔄 Main lagi</button>
+    <p class="small">Jika memiliki pertanyaan atau kekhawatiran kesehatan, cari sumber tepercaya dan konsultasikan dengan tenaga kesehatan yang kompeten.</p>
+  </section>
+</main>
+</div>
+<script>
+const questions = [
+ {topic:"Modul 1 • Mengenal tubuh",q:"Setiap orang bisa mengalami pubertas pada waktu yang berbeda.",a:true,why:"Fakta. Waktu dan kecepatan pubertas berbeda pada setiap orang. Jika perubahan tubuh terasa mengkhawatirkan, bicarakan dengan tenaga kesehatan."},
+ {topic:"Modul 3 • Menstruasi",q:"Siklus menstruasi setiap orang harus selalu tepat 28 hari.",a:false,why:"Mitos. Panjang siklus dapat bervariasi, terutama pada masa awal setelah menstruasi pertama. Perubahan yang mengkhawatirkan atau nyeri berat perlu dikonsultasikan."},
+ {topic:"Modul 4 • Persetujuan dan rasa hormat",q:"Persetujuan harus diberikan secara sukarela dan dapat ditarik kembali.",a:true,why:"Fakta. Persetujuan tidak boleh muncul karena tekanan atau paksaan, dan seseorang boleh berubah pikiran kapan saja."},
+ {topic:"Modul 5 • IMS dan HIV",q:"Seseorang dapat terlihat sehat tetapi tetap memiliki infeksi menular seksual.",a:true,why:"Fakta. Sebagian IMS tidak menimbulkan gejala. Pemeriksaan oleh layanan kesehatan adalah cara yang tepat untuk mengetahui status kesehatan."},
+ {topic:"Modul 6 • Pilihan bertanggung jawab",q:"Informasi kontrasepsi dari satu unggahan media sosial sudah cukup untuk menentukan pilihan.",a:false,why:"Mitos. Kebutuhan dan kondisi tiap orang berbeda. Gunakan sumber resmi dan konsultasikan pilihan kontrasepsi dengan tenaga kesehatan."},
+ {topic:"Modul 7 • Mitos atau fakta",q:"Jika sebuah tips kesehatan viral dan banyak disukai, berarti tips itu terbukti ilmiah.",a:false,why:"Mitos. Jumlah suka dan tayangan bukan bukti ilmiah. Periksa pembuat informasi, sumber, bukti penelitian, tanggal, dan kesesuaiannya dengan panduan resmi."},
+ {topic:"Modul 8 • Mencari bantuan",q:"Nyeri menstruasi yang sangat berat atau mengganggu aktivitas sebaiknya diabaikan.",a:false,why:"Mitos. Nyeri yang berat, baru muncul, memburuk, atau mengganggu aktivitas layak diperiksa oleh tenaga kesehatan."},
+ {topic:"Literasi kesehatan digital",q:"Kita sebaiknya tidak mendiagnosis diri sendiri hanya berdasarkan hasil pencarian internet.",a:true,why:"Fakta. Internet dapat membantu kita belajar, tetapi informasi online tidak dapat memastikan diagnosis. Pelajari sumber tepercaya, tanyakan pada tenaga kesehatan, dan periksa bila diperlukan."}
+];
+let index=0,score=0,answered=false,missed=[];
+const $=id=>document.getElementById(id);
+function render(){
+ answered=false;
+ const item=questions[index];
+ $("counter").textContent=`Pertanyaan ${index+1} dari ${questions.length}`;
+ $("scoreLabel").textContent=`⭐ Skor: ${score}`;
+ $("fill").style.width=`${index/questions.length*100}%`;
+ $("topic").textContent=item.topic;
+ $("question").textContent=item.q;
+ $("feedback").className="feedback";$("feedback").style.display="none";$("feedback").textContent="";
+ $("trueBtn").disabled=false;$("falseBtn").disabled=false;$("nextBtn").style.display="none";
+}
+function answer(value){
+ if(answered)return;answered=true;
+ const item=questions[index],correct=value===item.a;
+ if(correct)score++;else missed.push({q:item.q,why:item.why});
+ $("scoreLabel").textContent=`⭐ Skor: ${score}`;
+ $("trueBtn").disabled=true;$("falseBtn").disabled=true;
+ $("feedback").className="feedback "+(correct?"good":"bad");
+ $("feedback").style.display="block";
+ $("feedback").innerHTML=`<strong>${correct?"🎉 Benar!":"💡 Belum tepat."}</strong> ${item.why}`;
+ $("nextBtn").textContent=index===questions.length-1?"Lihat hasil ➜":"Lanjut ➜";
+ $("nextBtn").style.display="inline-block";
+}
+function nextQuestion(){
+ if(!answered)return;
+ index++;
+ if(index<questions.length)render();else finish();
+}
+function finish(){
+ $("play").style.display="none";$("result").style.display="block";
+ $("fill").style.width="100%";$("finalScore").textContent=`${score}/${questions.length}`;
+ const pct=score/questions.length;
+ $("resultText").textContent=pct===1?"Sempurna! Kamu teliti dan kritis terhadap informasi kesehatan.":pct>=.625?"Kerja bagus! Terus periksa sumber dan pelajari penjelasan setiap jawaban.":"Terus belajar, ya! Baca penjelasan dan kunjungi sumber kesehatan tepercaya untuk memperkuat pemahamanmu.";
+ $("review").innerHTML=missed.length?`<strong>📚 Yuk, pelajari lagi:</strong><ul>${missed.map(x=>`<li><strong>${x.q}</strong><br>${x.why}</li>`).join("")}</ul>`:"<strong>Hebat!</strong> Kamu menjawab semua pertanyaan dengan benar. Tetap kritis dan cek sumber tepercaya.";
+}
+function restart(){index=0;score=0;missed=[];$("play").style.display="block";$("result").style.display="none";render()}
+render();
+</script>
+</body>
+</html>
